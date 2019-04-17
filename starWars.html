@@ -1,0 +1,106 @@
+<html>
+    <head>
+        <title>STAR WARS</title>
+        <style>
+            .hidden {
+                display: none;
+            }
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+            }
+            td, th {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding: 8px;
+            }
+            tr:nth-child(even) {
+                background-color: #dddddd;
+            }
+        </style>
+    </head>
+    <body>
+        <script type="text/javascript">
+            items = [];
+            favorites = [];
+            getCharachters = function() {
+                var html = '';
+                var options = {
+                    method: 'GET',      
+                    headers: {}
+                };
+                var index = 1
+                for (i = 1; i < 5; i++) { 
+                    fetch(`https://swapi.co/api/people/${i}`, options).then((response)=> {
+                        return response.json();
+                    }).then((body)=> {
+                        body['id'] = index ++;
+                        items[body['id']] = body;
+                        var inFavorites = favorites.indexOf(body['id']) > -1;
+                        document.getElementById("the-body").insertAdjacentHTML("beforeend", 
+                       '<tr><td>'+ body['name'] + '</td><td>' +
+                                body['gender'] + '</td><td>' + body['birth_year'] +
+                            '</td><td><button type="button" onclick="view(\'' +
+                            body['id'] +'\')">view details</button>' + (inFavorites ? '<button id="r-' + body['id'] +'" type="button" onclick="remove(\'' + body['id'] + '\')">remove from favorites</button><button id="a-'+ body['id'] + '" class="hidden" type="button" onclick="add(\'' + body['id'] + '\')">Add to favorites</button>': '<button class="hidden" id="r-' + body['id'] +'" type="button" onclick="remove(\'' + body['id'] + '\')">remove from favorites</button><button id="a-'+ body['id'] + '" type="button" onclick="add(\'' + body['id'] + '\')">Add to favorites</button>') + '</td></tr>');
+                    });
+                }
+            }
+            view = function(id) {
+                var inFavorites = favorites.indexOf(id) > -1;
+                var html = '<ul>';
+                var item = items[id];
+                Object.keys(item).forEach(function(k) {
+                    html+= '<li>' + k +': ' + item[k] + '</li>';
+                })
+                var x = window.open('','_blank')
+                x.document.body.innerHTML = html + (inFavorites ? '<span style="color: red;">&#10084;</span>': '');
+            }
+            add = function(id) {
+                favorites.push(id);
+                var addButton = document.getElementById('a-' + id);
+                var removeButton = document.getElementById('r-' + id);
+                removeButton.classList.remove("hidden");
+                addButton.classList.add("hidden");
+                alertMsg.innerHTML = items[id]['name'] + ' was added to favorites'
+                alertMsg.classList.remove('hidden');
+                setTimeout(function() {
+                  alertMsg.innerHTML = ''
+                  alertMsg.classList.add('hidden');
+                }, 2000)
+            }
+            remove = function(id) {
+                var index = favorites.indexOf(id);
+                if (index >-1) {
+                  favorites.splice(index, 1);
+                  var addButton = document.getElementById('a-' + id);
+                  var removeButton = document.getElementById('r-' + id);
+                  removeButton.classList.add("hidden");
+                  addButton.classList.remove("hidden");
+                  var alertMsg = document.getElementById('alertMsg');
+                  alertMsg.innerHTML = items[id]['name'] + ' was removed from favorites'
+                  alertMsg.classList.remove('hidden');
+                  setTimeout(function() {
+                    alertMsg.innerHTML = ''
+                    alertMsg.classList.add('hidden');
+                  }, 2000)
+                }
+            }
+        </script>
+        <h1>WAR STAR <span style="color: blue" id="alertMsg"></span> </h1>
+        <table>
+            <tr>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>birth year</th>
+            <th>Actions</th>
+            </tr>
+            <tbody id="the-body">
+            </tbody>
+        </table>
+        <script>
+        getCharachters();
+        </script>
+
+    </body>
+</html>
